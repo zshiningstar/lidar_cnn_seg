@@ -1,7 +1,7 @@
 ## 深度学习Lidar障碍物检测分类
 * 参考:https://github.com/AbangLZU/cnn_seg_lidar
 
-![](images/results.png)
+![results](https://github.com/zshiningstar/lidar_cnn_seg/blob/cnn_seg_caffe/results/results.png)
 
 **以下环境安装必须按照本文档书写顺序,否则报错**
 ### 运行环境(首先必须保证自己电脑带有独立显卡)
