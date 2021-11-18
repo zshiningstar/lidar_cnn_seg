@@ -107,14 +107,14 @@ bool CNNSegmentation::init()
   class_pt_blob_ = caffe_net_->blob_by_name(class_pt_blob_name);
   CHECK(class_pt_blob_ != nullptr) << "`" << class_pt_blob_name
                                    << "` layer required";
-
+//实例化cluster2d_,智能指针的reset()方法,指向新对象
   cluster2d_.reset(new Cluster2D());
   if (!cluster2d_->init(height_, width_, range_))
   {
     ROS_ERROR("[%s] Fail to Initialize cluster2d for CNNSegmentation", __APP_NAME__);
     return false;
   }
-
+//实例化feature_generator_
   feature_generator_.reset(new FeatureGenerator());
   if (!feature_generator_->init(feature_blob_.get(), use_constant_feature_, range_, width_, height_))
   {
@@ -193,14 +193,16 @@ void CNNSegmentation::run()
   }else{
     ROS_ERROR("The network init fail!!!");
   }
-
+  
+  //订阅输入点云
   points_sub_ = nh_.subscribe(topic_src_, 1, &CNNSegmentation::pointsCallback, this);
+  //发布聚类后的障碍物点云
   points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/detection/lidar_detector/points_cluster", 1);
 
   mapping_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/mapping_points", 1);
   original_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/original_points", 1);
   
-
+  //发布障碍物信息
   objects_pub_ = nh_.advertise<rockauto_msgs::DetectedObjectArray>("/detection/lidar_detector/objects", 1);
 
   ROS_INFO("[%s] Ready. Waiting for data...", __APP_NAME__);
@@ -209,19 +211,20 @@ void CNNSegmentation::run()
 void CNNSegmentation::pointsCallback(const sensor_msgs::PointCloud2 &msg)
 {
   std::chrono::system_clock::time_point start, end;
-  start = std::chrono::system_clock::now();
+  start = std::chrono::system_clock::now();//开始时间
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr in_pc_ptr(new pcl::PointCloud<pcl::PointXYZI>);
-  pcl::fromROSMsg(msg, *in_pc_ptr);
+  pcl::fromROSMsg(msg, *in_pc_ptr);//输入点云转化为ros点云
   pcl::PointIndices valid_idx;
-  auto &indices = valid_idx.indices;
+  auto &indices = valid_idx.indices;//取名字
   indices.resize(in_pc_ptr->size());
-  std::iota(indices.begin(), indices.end(), 0);
+  std::iota(indices.begin(), indices.end(), 0);//产生连续值,从0开始,到输入点云的最后一个下标
+  
   message_header_ = msg.header;
 
   rockauto_msgs::DetectedObjectArray objects;
   objects.header = message_header_;
-  segment(in_pc_ptr, valid_idx, objects);
+  segment(in_pc_ptr, valid_idx, objects);//分割
   
   // segDetected(objects, in_pc_ptr);
 

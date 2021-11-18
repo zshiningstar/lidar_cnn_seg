@@ -2,10 +2,10 @@
 
 bool Cluster2D::init(int rows, int cols, float range)
 {
-    rows_ = rows;
-    cols_ = cols;
+    rows_ = rows;//行数->高度->672
+    cols_ = cols;//列数->宽度->672
     grids_ = rows_ * cols_;
-    range_ = range;
+    range_ = range;//70
     scale_ = 0.5 * static_cast<float>(rows_) / range_;
     inv_res_x_ = 0.5 * static_cast<float>(cols_) / range_;
     inv_res_y_ = 0.5 * static_cast<float>(rows_) / range_;
